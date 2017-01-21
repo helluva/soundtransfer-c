@@ -12,7 +12,7 @@ int* freqs_from_input(const char* data, int num_of_bytes) {
                 + ((unsigned char) (
 
 //                                    [cur byte ]     [          section of byte              ]                      [      bit mask            ]
-                    (((unsigned char) (*data + b)) >> (8 - BITS_PER_TONE - (i * BITS_PER_TONE))) & (((unsigned char) (0x1 << BITS_PER_TONE)) - 1)
+                    (((unsigned char) *(data + b)) >> (8 - BITS_PER_TONE - (i * BITS_PER_TONE))) & (((unsigned char) (0x1 << BITS_PER_TONE)) - 1)
 
                 )) * LINEAR_INTERVAL;
         }
