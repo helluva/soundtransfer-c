@@ -8,6 +8,6 @@ void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes);
 int receive_frame(double frequency);
 
 void process_chunk(double* chunk);
-void process_tone(int value);
+void process_tone(int frequency);
 void append_bits(unsigned char bits);
 int compare_freq(double frequency, double target_frequency);

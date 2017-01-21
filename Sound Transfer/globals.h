@@ -10,6 +10,6 @@ extern const int SAMPLES_PER_CHUNK;
 
 extern const double MATCH_THRESHOLD;
 
-extern const double INITIALIZE_TRANSFER_FREQUENCY;
+extern const double GUARD_FREQUENCY;
 
 #endif

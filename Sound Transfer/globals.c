@@ -8,4 +8,4 @@ const int SAMPLES_PER_CHUNK = 9;
 
 const double MATCH_THRESHOLD = 25.0;
 
-const double INITIALIZE_TRANSFER_FREQUENCY = 1500.0;
+const double GUARD_FREQUENCY = 800;
