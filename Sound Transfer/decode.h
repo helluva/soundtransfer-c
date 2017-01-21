@@ -1,6 +1,6 @@
 
 
-void init(int* length, char** decodedBytes);
+void init(int* length, unsigned char** decodedBytes);
 
 // return 0: not receiving data
 // return n: receiving data of byte length n

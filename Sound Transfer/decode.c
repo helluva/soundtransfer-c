@@ -6,46 +6,153 @@
 
 static const int UNINITIALIZED = -99;
 static const int NOT_RECEIVING = -1;
-static const int RECEIVING_HEADER = 1;
+static const int RECEIVING_HEADER = -2;
 static const int TRANSFER_COMPLETE = 0;
 
-static int statusCode = UNINITIALIZED;
+static int status = UNINITIALIZED;
+
+static int* num_of_tones_for_data;
+static unsigned char** decoded_bytes_p;
 
 
+static double* chunk;
+static int received_freq_index = 0;
 
 
+void init(int* num_of_tones, unsigned char** decoded_bytes) {
 
-static double* previousFrequencies;
-static int previousFrequenciesCount = 0;
+    num_of_tones_for_data = num_of_tones;
+    decoded_bytes_p = decoded_bytes;
 
 
-void init(int* length, char** decodedBytes) {
-    statusCode = NOT_RECEIVING;
-    previousFrequencies = malloc(sizeof(double) * SAMPLES_PER_ENCODED_FREQUENCY);
+    // THIS IS TEMPORARY FOR TESTING!
+    *num_of_tones_for_data = 8;
+    *decoded_bytes_p = malloc(sizeof(char) * 4); // 4 bytes
+    // THIS IS TEMPORARY!
+
+
+    chunk = malloc(sizeof(double) * SAMPLES_PER_CHUNK);
+
+    status = NOT_RECEIVING;
 }
-
-
-int frequenciesMatch(double frequency, double target) {
-    double threshold = 25.0;
-    double difference = abs(frequency - target);
-    return difference < threshold;
-}
-
 
 int receive_frame(double frequency) {
 
-    if (statusCode == UNINITIALIZED) {
-        return statusCode;
+    if (status == UNINITIALIZED) {
+        return status;
     }
+
+    chunk[received_freq_index++] = frequency;
+    if (received_freq_index == SAMPLES_PER_CHUNK) {
+        process_chunk(chunk);
+        received_freq_index = 0;
+    }
+
+    return status;
+}
+
+void process_chunk(double* chunk) {
+
+    int num_of_frequencies = 0x1 << BITS_PER_TONE;
+
+    int matches_per_frequency[num_of_frequencies];
+
+    for (int i = 0; i < SAMPLES_PER_CHUNK; ++i) {
+
+        for (int f = 0; f < num_of_frequencies; ++f) {
+            if (compare_freq(chunk[i], BASE_FREQ + LINEAR_INTERVAL * f)) {
+                matches_per_frequency[f]++;
+            }
+        }
+
+    }
+
+    int max_count = 0;
+    int max_count_index = 0;
+    for (int f = 0; f < num_of_frequencies; ++f) {
+        if (matches_per_frequency[f] >= max_count) {
+            max_count = matches_per_frequency[f];
+            max_count_index = f;
+        }
+    }
+
+    process_tone(max_count_index);
+
+}
+
+void process_tone(int value) {
+
+    // TODO: process intro tone and length data here
+
+    append_bits((unsigned char) value);
+}
+
+void append_bits(unsigned char bits) {
+
+    unsigned char* cur_byte = &((*decoded_bytes_p)[appended_bits_count / 8]);
+
+    *cur_byte += bits << (8 - appended_bits_count % 8 - BITS_PER_TONE);
+
+    appended_bits_count += BITS_PER_TONE;
+
+}
+
+int compare_freq(double frequency, double target_frequency) {
+    double difference = abs(frequency - target_frequency);
+    return difference < MATCH_THRESHOLD;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 
 
     //build the 9 previous frequencies
-    if (previousFrequenciesCount < SAMPLES_PER_ENCODED_FREQUENCY) {
+    if (previousFrequenciesCount < SAMPLES_PER_CHUNK) {
         previousFrequencies[previousFrequenciesCount] = frequency;
         previousFrequenciesCount += 1;
     }
 
-    if (previousFrequenciesCount == SAMPLES_PER_ENCODED_FREQUENCY) {
+    if (previousFrequenciesCount == SAMPLES_PER_CHUNK) {
 
         //build "dictionary" of valid frequencies
         int validFrequenciesCount = 16;
@@ -86,7 +193,7 @@ int receive_frame(double frequency) {
 
         //reset previous frequencies
         previousFrequenciesCount = 0;
-        for (int i = 0; i < SAMPLES_PER_ENCODED_FREQUENCY; i++) {
+        for (int i = 0; i < SAMPLES_PER_CHUNK; i++) {
             previousFrequencies[i] = 0;
         }
 
@@ -95,5 +202,4 @@ int receive_frame(double frequency) {
         }
     }
 
-    return statusCode;
-}
+    */
