@@ -5,10 +5,10 @@
 #include "encode.h"
 
 int* freqs_from_input(const char* data, int num_of_bytes) {
-    int* output = malloc(sizeof(int) * num_of_bytes * 8 / BITS_PER_TONE);
+    int* output = malloc(sizeof(int) * (2 + num_of_bytes * 8 / BITS_PER_TONE));
     for (int b = 0; b < num_of_bytes; ++b) {
         for (int i = 0; i < 8 / BITS_PER_TONE; ++i) {
-            output[b * (8 / BITS_PER_TONE) + i] = BASE_FREQ
+            output[2 + b * (8 / BITS_PER_TONE) + i] = BASE_FREQ
                 + ((unsigned char) (
 
 //                                    [cur byte ]     [          section of byte              ]                      [      bit mask            ]
@@ -17,5 +17,7 @@ int* freqs_from_input(const char* data, int num_of_bytes) {
                 )) * LINEAR_INTERVAL;
         }
     }
+    output[0] = GUARD_FREQUENCY;
+    output[1] = GUARD_FREQUENCY;
     return output;
 }
