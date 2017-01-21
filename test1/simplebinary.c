@@ -27,28 +27,28 @@ int* freq_2_from_input(char one_byte) {
     return a;
 }
 
-int* readFile(char *fileName) {
-    FILE *file = fopen(fileName, "r");
-    int *code;
-    size_t n = 0;
-    int c;
-    fseek(file, 0, SEEK_END); /* Go to end of file */
-    size = ftell(file);
+// int* readFile(char *fileName) {
+//     FILE *file = fopen(fileName, "r");
+//     int *code;
+//     size_t n = 0;
+//     int c;
+//     fseek(file, 0, SEEK_END); /* Go to end of file */
+//     size = ftell(file);
 
-    rewind(fp);
+//     rewind(fp);
 
-    if (file == NULL)
-        return NULL; //could not open file
+//     if (file == NULL)
+//         return NULL; //could not open file
 
-    code = malloc(sizeof(int) * size * 4);
+//     code = malloc(sizeof(int) * size * 4);
 
-    while ((c = fgetc(file)) != EOF)
-    {
-        code[n++] = freq_4_from_input(c);
-    }
+//     while ((c = fgetc(file)) != EOF)
+//     {
+//         code[n++] = freq_4_from_input(c);
+//     }
 
-    // don't forget to terminate with the null character
-    code[n] = '\0';
+//     // don't forget to terminate with the null character
+//     code[n] = '\0';
 
-    return code;
-}
+//     return code;
+// }
