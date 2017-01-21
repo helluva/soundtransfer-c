@@ -1,5 +1,4 @@
 
-#include "globals.h"
 #include "decode.h"
 #include <math.h>
 #include <stdlib.h>
@@ -36,18 +35,18 @@ int frequenciesMatch(double frequency, double target) {
 
 
 int frame(double frequency, char** decodedBytes) {
-
+    
     if (statusCode == Uninitialized) {
         return statusCode;
     }
-
-
+    
+    
     //build the 9 previous frequencies
     if (previousFrequenciesCount < Samples_Per_Encoded_Frequency) {
         previousFrequencies[previousFrequenciesCount] = frequency;
         previousFrequenciesCount += 1;
     }
-
+    
     if (previousFrequenciesCount == Samples_Per_Encoded_Frequency) {
         
         //build "dictionary" of valid frequencies
@@ -86,9 +85,17 @@ int frame(double frequency, char** decodedBytes) {
             }
         }
         
-        return mostCommonFrequency;
         
+        //reset previous frequencies
+        previousFrequenciesCount = 0;
+        for (int i = 0; i < Samples_Per_Encoded_Frequency; i++) {
+            previousFrequencies[i] = 0;
+        }
+        
+        if (mostCommonFrequency != -1 && mostCommonFrequencyCount > 4) {
+            return mostCommonFrequency;
+        }
     }
-
+    
     return statusCode;
 }
