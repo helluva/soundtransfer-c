@@ -22,7 +22,7 @@ int* freq_4_from_input(char one_byte) {
 int* freq_2_from_input(char one_byte) {
     static int a[2];
     for (int i = 0; i < 2; ++i) {
-        a[i] = 300 + ((one_byte >> (4 - (i * 4))) & 0xF) * 200;
+        a[i] = ((one_byte >> (4 - (i * 4))) & 0xF);
     }
     return a;
 }
