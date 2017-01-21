@@ -1,5 +1,4 @@
 
-
 void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes);
 
 // return 0: not receiving data
