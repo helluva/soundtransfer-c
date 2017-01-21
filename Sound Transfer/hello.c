@@ -1,10 +1,6 @@
-#include<stdio.h>
+
+#include "hello.h"
 
 char* helloWorld() {
-    return "Hello from C\n";
-}
-
-int main()
-{
-    printf(helloWorld());
+    return "Hello from hello.c\n";
 }
