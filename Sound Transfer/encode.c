@@ -1,4 +1,6 @@
 
+#include <stdlib.h>
+
 #include "globals.h"
 #include "encode.h"
 
