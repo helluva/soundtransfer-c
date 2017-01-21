@@ -5,17 +5,24 @@
 static const int Uninitialized = -99;
 static const int Not_Receiving = 0;
 static const int Transfer_Complete = -1;
-static const double Initialize_Transfer_Frequency = 1500.0;
 
 static int statusCode = Uninitialized;
 
+
+static const double Samples_Per_Second = 36.0;
+static const double Encoded_Frequencies_Per_Second = 4.0;
+static const double Samples_Per_Encoded_Frequency = 9;
+
+static const double Initialize_Transfer_Frequency = 1500.0;
+
+
 static double* previousFrequencies;
-static int Moving_Average_Size = 5;
+static int previousFrequenciesCount = 0;
 
 
 void initialize() {
     statusCode = Not_Receiving;
-    previousFrequencies = malloc(sizeof(double) * 5)
+    previousFrequencies = malloc(sizeof(double) * Samples_Per_Encoded_Frequency);
 }
 
 
@@ -26,20 +33,17 @@ int frame(double frequency, char** decodedBytes) {
     }
     
     
-    //update previous frequencies
-    for (int i = 1; i < Moving_Average_Size; i++) {
-        previousFrequencies[i - i]  = previousFrequencies[i];
+    //build the 9 previous frequencies
+    if (previousFrequenciesCount < Samples_Per_Encoded_Frequency) {
+        previousFrequencies[previousFrequenciesCount] = frequency;
+        previousFrequenciesCount += 1
     }
     
-    previouosFrequencies[Moving_Average_Size - 1] = frequency;
-    
-    //recalculate moving average
-    double movingAverage = 0;
-    for (int i = 0; i < Moving_Average_Size; i++) {
-        movingAverage += previousFrequencies[i];
+    if (previousFrequenciesCount == Samples_Per_Encoded_Frequency) {
+        
+        
+        
     }
-    
-    movingAverage /= Moving_Average_Size;
     
     
     /* user moving average to determine next action */
