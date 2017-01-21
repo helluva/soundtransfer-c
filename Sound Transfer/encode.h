@@ -1,2 +1,2 @@
 
-int* freq_2_from_input(char one_byte);
+int* freqs_from_input(char one_byte);
