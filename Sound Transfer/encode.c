@@ -18,6 +18,6 @@ int* freqs_from_input(const char* data, int num_of_bytes) {
         }
     }
     output[0] = GUARD_FREQUENCY;
-    output[1] = GUARD_FREQUENCY;
+    output[1] = GUARD_FREQUENCY_B;
     return output;
 }

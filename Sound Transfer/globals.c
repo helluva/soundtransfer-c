@@ -9,3 +9,4 @@ const int SAMPLES_PER_CHUNK = 9;
 const double MATCH_THRESHOLD = 25.0;
 
 const double GUARD_FREQUENCY = 800;
+const double GUARD_FREQUENCY_B = 900;
