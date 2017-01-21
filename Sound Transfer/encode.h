@@ -1,2 +1,2 @@
 
-int* freqs_from_input(char one_byte);
+int* freqs_from_input(char* data, int num_of_bytes, int* output);
