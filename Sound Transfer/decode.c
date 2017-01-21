@@ -1,6 +1,7 @@
 
 #include "decode.h"
 #include <math.h>
+#include <stdlib.h>
 
 static const int Uninitialized = -99;
 static const int Not_Receiving = 0;
@@ -26,40 +27,67 @@ void initialize() {
 }
 
 
+int frequenciesMatch(double frequency, double target) {
+    double threshold = 25.0;
+    double difference = abs(frequency - target);
+    return difference < threshold;
+}
+
+
 int frame(double frequency, char** decodedBytes) {
     
     if (statusCode == Uninitialized) {
-        return;
+        return statusCode;
     }
     
     
     //build the 9 previous frequencies
     if (previousFrequenciesCount < Samples_Per_Encoded_Frequency) {
         previousFrequencies[previousFrequenciesCount] = frequency;
-        previousFrequenciesCount += 1
+        previousFrequenciesCount += 1;
     }
     
     if (previousFrequenciesCount == Samples_Per_Encoded_Frequency) {
         
+        //build "dictionary" of valid frequencies
+        int validFrequenciesCount = 16;
+        int expectedFrequencies[validFrequenciesCount];
+        int matchCount[validFrequenciesCount];
         
+        int base = 1000; //replace with global constant
+        int increment = 100; //replace with global constant
         
-    }
-    
-    
-    /* user moving average to determine next action */
-    
-    //if not receiving, listen for trigger
-    if (statusCode == Not_Receiving) {
-        if (frequenciesMatch(movingAverage, Initialize_Transfer_Frequency)) {
-            //i dunno
+        for (int i = 0; i < validFrequenciesCount; i++) {
+            matchCount[i] = 0;
+            expectedFrequencies[i] = base + (increment * i);
         }
+        
+        //attribute previous frequencies to valid frequencies
+        for (int i = 0; i < previousFrequenciesCount; i++) {
+            int frequencyToAnalyze = previousFrequencies[i];
+            
+            for (int j = 0; j < validFrequenciesCount; j++){
+                int possibleMatch = expectedFrequencies[j];
+                if (frequenciesMatch(frequencyToAnalyze, possibleMatch)) {
+                    matchCount[j] = matchCount[j] + 1;
+                }
+            }
+        }
+        
+        //find most common of the expected frequencies
+        int mostCommonFrequency = -1;
+        int mostCommonFrequencyCount = 0;
+        
+        for (int j = 0; j < validFrequenciesCount; j++) {
+            if (matchCount[j] > mostCommonFrequencyCount) {
+                mostCommonFrequency = expectedFrequencies[j];
+                mostCommonFrequencyCount = matchCount[j];
+            }
+        }
+        
+        return mostCommonFrequency;
+        
     }
     
     return statusCode;
-}
-
-int frequenciesMatch(double frequency, double target) {
-    double threshold = 25.0;
-    double difference = abs(frequency - target);
-    return difference < threshold;
 }
