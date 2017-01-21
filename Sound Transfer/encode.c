@@ -4,7 +4,7 @@
 #include "globals.h"
 #include "encode.h"
 
-int* freqs_from_input(char* data, int num_of_bytes) {
+int* freqs_from_input(const char* data, int num_of_bytes) {
     int* output = malloc(sizeof(int) * num_of_bytes * 8 / BITS_PER_TONE);
     for (int b = 0; b < num_of_bytes; ++b) {
         for (int i = 0; i < 8 / BITS_PER_TONE; ++i) {
