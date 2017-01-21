@@ -10,10 +10,11 @@ int* freq_8_from_input(char one_byte) {
     return a;
 }
 
+// returns an "array" of length 4
 int* freq_4_from_input(char one_byte) {
     int[4] a;
     for (int i = 0; i < 4; ++i) {
-        a[i * 2] = 300 + ((one_byte >> (7 - (i * 2))) & 0x3) * 200;
+        a[i] = 300 + ((one_byte >> (7 - (i * 2))) & 0x3) * 200;
     }
     return a;
 }
