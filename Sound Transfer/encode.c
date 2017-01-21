@@ -3,7 +3,7 @@
 #include "encode.h"
 
 int* freqs_from_input(char* data, int num_of_bytes) {
-    int output[num_of_bytes * 8 / BITS_PER_TONE];
+    int* output = malloc(sizeof(int) * num_of_bytes * 8 / BITS_PER_TONE);
     for (int b = 0; b < num_of_bytes; ++b) {
         for (int i = 0; i < 8 / BITS_PER_TONE; ++i) {
             output[b * (8 / BITS_PER_TONE) + i] = BASE_FREQ
