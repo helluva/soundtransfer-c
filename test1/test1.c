@@ -11,4 +11,5 @@ int main() {
     printf("this number should be 500: %i\n", freq_4_from_input(0x1)[3]);
     printf("this number should be 700: %i\n", freq_4_from_input(0x2)[3]);
     printf("this number should be 900: %i\n", freq_4_from_input(0x3)[3]);
+    printf("test");
 }

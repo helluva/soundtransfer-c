@@ -1,4 +1,4 @@
-
+#include <stdlib.h>
 #include "simplebinary.h"
 
 // returns an "array" of length 8
@@ -25,4 +25,30 @@ int* freq_2_from_input(char one_byte) {
         a[i] = 400 + (unsigned char) ((one_byte >> (4 - (i * 4))) & 0xF) * 200;
     }
     return a;
+}
+
+int* readFile(char *fileName) {
+    FILE *file = fopen(fileName, "r");
+    int *code;
+    size_t n = 0;
+    int c;
+    fseek(file, 0, SEEK_END); /* Go to end of file */
+    size = ftell(file);
+
+    rewind(fp);
+
+    if (file == NULL)
+        return NULL; //could not open file
+
+    code = malloc(sizeof(int) * size * 4);
+
+    while ((c = fgetc(file)) != EOF)
+    {
+        code[n++] = freq_4_from_input(c);
+    }
+
+    // don't forget to terminate with the null character
+    code[n] = '\0';
+
+    return code;
 }
