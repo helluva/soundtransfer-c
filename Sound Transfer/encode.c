@@ -9,12 +9,12 @@ int* freqs_from_input(const char* data, int num_of_bytes) {
     for (int b = 0; b < num_of_bytes; ++b) {
         for (int i = 0; i < 8 / BITS_PER_TONE; ++i) {
             output[b * (8 / BITS_PER_TONE) + i] = BASE_FREQ
-                + (unsigned char) (
+                + ((unsigned char) (
 
-//                   [cur byte ]    [          section of byte              ]    [      bit mask            ]
-                    ((*data + b) >> (8 - BITS_PER_TONE - (i * BITS_PER_TONE))) & ((0x1 << BITS_PER_TONE) - 1)
+//                                    [cur byte ]     [          section of byte              ]                      [      bit mask            ]
+                    (((unsigned char) (*data + b)) >> (8 - BITS_PER_TONE - (i * BITS_PER_TONE))) & (((unsigned char) (0x1 << BITS_PER_TONE)) - 1)
 
-                ) * LINEAR_INTERVAL;
+                )) * LINEAR_INTERVAL;
         }
     }
     return output;
