@@ -1,4 +1,5 @@
 
+#include "globals.h"
 #include "decode.h"
 #include <math.h>
 
@@ -27,34 +28,34 @@ void initialize() {
 
 
 int frame(double frequency, char** decodedBytes) {
-    
+
     if (statusCode == Uninitialized) {
         return;
     }
-    
-    
+
+
     //build the 9 previous frequencies
     if (previousFrequenciesCount < Samples_Per_Encoded_Frequency) {
         previousFrequencies[previousFrequenciesCount] = frequency;
         previousFrequenciesCount += 1
     }
-    
+
     if (previousFrequenciesCount == Samples_Per_Encoded_Frequency) {
-        
-        
-        
+
+
+
     }
-    
-    
+
+
     /* user moving average to determine next action */
-    
+
     //if not receiving, listen for trigger
     if (statusCode == Not_Receiving) {
         if (frequenciesMatch(movingAverage, Initialize_Transfer_Frequency)) {
             //i dunno
         }
     }
-    
+
     return statusCode;
 }
 

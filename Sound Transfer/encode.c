@@ -1,8 +1,6 @@
 
+#include "globals.h"
 #include "encode.h"
-
-const int BASE_FREQ = 1000;
-const int LINEAR_INTERVAL = 100;
 
 int* freq_2_from_input(char one_byte) {
     static int a[2];
