@@ -62,7 +62,7 @@ int receive_frame(double frequency) {
         return status;
     }
 
-    det_counter++;
+    det_counter = (det_counter + 1) % SAMPLES_PER_CHUNK;
 
     moving_avg[moving_avg_index % SAMPLES_PER_CHUNK] = frequency;
     double avg = find_avg(moving_avg);
@@ -120,4 +120,25 @@ void append_bits(unsigned char bits) {
 int compare_freq(double frequency, double target_frequency) {
     double difference = fabs(frequency - target_frequency);
     return difference < MATCH_THRESHOLD;
+}
+
+
+
+double cmpfunc (const void * a, const void * b) {
+    return ( *(double*)a - *(double*)b );
+}
+
+double find_avg(double* freqs) {
+    qsort(freqs, SAMPLES_PER_CHUNK, sizeof(double), cmpfunc)
+}
+
+int close_frequency(double freq) {
+    for (int i = 0; i < (0x1 << BITS_PER_TONE); ++i) {
+        if (compare_freq(freq, BASE_FREQ + i * LINEAR_INTERVAL)) {
+            return BASE_FREQ + i * LINEAR_INTERVAL;
+        }
+    }
+    if (compare_freq(freq, GUARD_FREQUENCY)) return GUARD_FREQUENCY;
+    if (compare_freq(freq, GUARD_FREQUENCY_B)) return GUARD_FREQUENCY_B;
+    return 0;
 }
