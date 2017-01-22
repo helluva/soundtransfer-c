@@ -31,7 +31,7 @@ static int det_counter = 0;
 
 
 static int moving_avg_index = 0;
-static double moving_avg[SAMPLES_PER_CHUNK];
+static double moving_avg[9]; //SAMPLES_PER_CHUNK
 
 
 
@@ -46,7 +46,7 @@ void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes) {
 
     det_counter = SAMPLES_PER_CHUNK;
 
-    rolling_avg_index = 0;
+    moving_avg_index = 0;
     for (int i = 0; i < SAMPLES_PER_CHUNK; ++i) {
         moving_avg[i] = 0;
     }
@@ -61,13 +61,17 @@ int receive_frame(double frequency) {
     if (status == UNINITIALIZED || status == TRANSFER_COMPLETE) {
         return status;
     }
-
-    det_counter = (det_counter + 1) % SAMPLES_PER_CHUNK;
-
+    
+    det_counter++;
+    
     moving_avg[moving_avg_index % SAMPLES_PER_CHUNK] = frequency;
+    moving_avg_index = (moving_avg_index + 1) % SAMPLES_PER_CHUNK;
+    
     double avg = find_avg(moving_avg);
     int det = close_frequency(avg);
 
+    //printf("freq: %i     avg: %i      det: %i\n", (int)frequency, (int)avg, (int)det);
+    
     if (det && det_counter >= SAMPLES_PER_CHUNK / 2) {
         det_counter = 0;
         process(det);
@@ -78,6 +82,8 @@ int receive_frame(double frequency) {
 
 void process(int frequency) {
 
+    printf("processing %i\n", frequency);
+    
     if (status == WAITING_FOR_START_FREQUENCY && frequency == GUARD_FREQUENCY) {
         status = DETECTED_START_FREQUENCY;
     } else if (status == DETECTED_START_FREQUENCY) {
@@ -124,12 +130,17 @@ int compare_freq(double frequency, double target_frequency) {
 
 
 
-double cmpfunc (const void * a, const void * b) {
-    return ( *(double*)a - *(double*)b );
+int cmpfunc (const void * a, const void * b) {
+    return ( *(int*)a - *(int*)b );
 }
 
 double find_avg(double* freqs) {
-    qsort(freqs, SAMPLES_PER_CHUNK, sizeof(double), cmpfunc)
+    int temp[9];
+    for (int i = 0; i < 9; ++i) {
+        temp[i] = (int) freqs[i];
+    }
+    qsort(temp, 9, sizeof(int), cmpfunc);
+    return temp[4];
 }
 
 int close_frequency(double freq) {
