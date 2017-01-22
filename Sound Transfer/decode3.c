@@ -26,8 +26,7 @@ static unsigned char** decoded_bytes_p;
 static int appended_bits_count = 0;
 
 
-static const int COOLDOWN_SIZE = 3;
-static int candidate_freqs;
+static int candidate_freq;
 static int candidate_cooldown;
 
 
@@ -55,8 +54,8 @@ int receive_frame(double frequency) {
     }
 
     int close = close_frequency(frequency);
-    if (candidate_cooldown >= COOLDOWN_SIZE) {
-        if (close != 0 && close != median_val) {
+    if (candidate_cooldown >= 3) {
+        if ((close != 0 && close != candidate_freq) || close = GUARD_FREQUENCY_TEXT) {
             process(candidate_freq);
             candidate_cooldown = 0;
         }
