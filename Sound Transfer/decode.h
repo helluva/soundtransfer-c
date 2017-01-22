@@ -12,3 +12,6 @@ void process_tone(int frequency);
 void append_bits(unsigned char bits);
 int* process_colors(unsigned char bits);
 int compare_freq(double frequency, double target_frequency);
+
+void process(int frequency);
+int close_frequency(double freq);

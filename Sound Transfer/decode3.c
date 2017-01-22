@@ -27,7 +27,6 @@ static int appended_bits_count = 0;
 
 
 static int candidate_freq;
-static int candidate_cooldown;
 
 
 
@@ -36,43 +35,51 @@ void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes) {
     num_of_tones_for_data = num_of_tones;
     decoded_bytes_p = decoded_bytes;
 
-    candidate_cooldown = 0;
-
     header_chunk_count = 0;
     header_chunk = 0;
 
     appended_bits_count = 0;
 
+    candidate_freq = 0;
+    
     status = WAITING_FOR_START_FREQUENCY;
 }
 
 
 int receive_frame(double frequency) {
 
+    printf("%i\n", (int)frequency);
+    
     if (status == UNINITIALIZED || status == TRANSFER_COMPLETE) {
         return status;
     }
 
     int close = close_frequency(frequency);
-    if (candidate_cooldown >= 3) {
-        if ((close != 0 && close != candidate_freq) || close = GUARD_FREQUENCY_TEXT) {
-            process(candidate_freq);
-            candidate_cooldown = 0;
-        }
+    
+    if ((close != 0 && close != candidate_freq) || (close == GUARD_FREQUENCY_TEXT)) {
+        candidate_freq = close;
+        process(candidate_freq);
     }
-    candidate_cooldown++;
 
     return status;
 }
 
 void process(int frequency) {
 
+    //printf("processing %i\n", frequency);
+    
     if (status == WAITING_FOR_START_FREQUENCY && frequency == GUARD_FREQUENCY_TEXT) {
         status = DETECTED_START_FREQUENCY;
+        //printf("status = detected start freq\n");
     } else if (status == DETECTED_START_FREQUENCY) {
         status = WAITING_FOR_START_FREQUENCY;
+        if (frequency == GUARD_FREQUENCY_TEXT) {
+            status = DETECTED_START_FREQUENCY;
+        }
+        //printf("status = waiting for start\n");
         if (frequency == GUARD_FREQUENCY_TEXT_B) {
             status = RECEIVING_HEADER;
+            //printf("status = receiving header\n");
         }
     } else {
 
@@ -84,9 +91,14 @@ void process(int frequency) {
             unsigned char bits = (unsigned char) ((frequency - BASE_FREQ) / LINEAR_INTERVAL);
             header_chunk += bits << (8 - BITS_PER_TONE - header_chunk_count * BITS_PER_TONE);
             header_chunk_count++;
+            
+            //printf("header chunk: %i     count: %i\n", (int)header_chunk, header_chunk_count);
+            
             if (header_chunk_count >= 8 / BITS_PER_TONE) {
                 *num_of_tones_for_data = header_chunk * (8 / BITS_PER_TONE);
-                *decoded_bytes_p = malloc(sizeof(char) * header_chunk);
+                
+                *decoded_bytes_p = calloc(header_chunk, sizeof(char));//malloc(sizeof(char) * header_chunk);
+                
                 status = RECEIVING_BODY;
             }
         } else if (status == RECEIVING_BODY) {
@@ -97,6 +109,9 @@ void process(int frequency) {
 
 void append_bits(unsigned char bits) {
 
+    printf("%i\n", -200);
+    
+    
     unsigned char* cur_byte = &((*decoded_bytes_p)[appended_bits_count / 8]);
 
     *cur_byte += bits << (8 - appended_bits_count % 8 - BITS_PER_TONE);
@@ -124,5 +139,6 @@ int close_frequency(double freq) {
     }
     if (compare_freq(freq, GUARD_FREQUENCY_TEXT)) return GUARD_FREQUENCY_TEXT;
     if (compare_freq(freq, GUARD_FREQUENCY_TEXT_B)) return GUARD_FREQUENCY_TEXT_B;
+    if (compare_freq(freq, REPEAT_SEPARATOR_FREQUENCY)) return REPEAT_SEPARATOR_FREQUENCY;
     return 0;
 }
