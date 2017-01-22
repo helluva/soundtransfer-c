@@ -84,11 +84,11 @@ void process(int frequency) {
 
     printf("processing %i\n", frequency);
 
-    if (status == WAITING_FOR_START_FREQUENCY && frequency == GUARD_FREQUENCY) {
+    if (status == WAITING_FOR_START_FREQUENCY && frequency == GUARD_FREQUENCY_TEXT) {
         status = DETECTED_START_FREQUENCY;
     } else if (status == DETECTED_START_FREQUENCY) {
         status = WAITING_FOR_START_FREQUENCY;
-        if (frequency == GUARD_FREQUENCY_B) {
+        if (frequency == GUARD_FREQUENCY_TEXT_B) {
             status = RECEIVING_HEADER;
         }
     } else if (status == RECEIVING_HEADER) {
@@ -150,7 +150,7 @@ int close_frequency(double freq) {
             return BASE_FREQ + i * LINEAR_INTERVAL;
         }
     }
-    if (compare_freq(freq, GUARD_FREQUENCY)) return GUARD_FREQUENCY;
-    if (compare_freq(freq, GUARD_FREQUENCY_B)) return GUARD_FREQUENCY_B;
+    if (compare_freq(freq, GUARD_FREQUENCY_TEXT)) return GUARD_FREQUENCY_TEXT;
+    if (compare_freq(freq, GUARD_FREQUENCY_TEXT_B)) return GUARD_FREQUENCY_TEXT_B;
     return 0;
 }

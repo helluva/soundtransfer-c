@@ -17,6 +17,8 @@ static int status = UNINITIALIZED;
 static int header_chunk_count = 0;
 static unsigned char header_chunk = 0;
 
+static int most_recent_reported_frequency = -1;
+
 static int* num_of_tones_for_data;
 static unsigned char** decoded_bytes_p;
 
@@ -40,6 +42,8 @@ void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes) {
     chunk = malloc(sizeof(double) * SAMPLES_PER_CHUNK);
 
     status = WAITING_FOR_START_FREQUENCY;
+    
+    most_recent_reported_frequency = -1;
 }
 
 int receive_frame(double frequency) {
@@ -99,7 +103,7 @@ void process_chunk(double* chunk) {
         }
     }
 
-    if (max_count > 3) {
+    if (max_count > 1) {
         if (max_count_index == GUARD_FREQUENCY_TEXT_bucket) {
             process_tone(GUARD_FREQUENCY_TEXT);
         } else if (max_count_index == GUARD_FREQUENCY_TEXT_B_bucket) {
@@ -113,16 +117,25 @@ void process_chunk(double* chunk) {
 
 void process_tone(int frequency) {
 
-    //printf("received %i\n", frequency);
-
+    printf("received %i\n", frequency);
+    
+    if (most_recent_reported_frequency == frequency) {
+        return;
+    }
+    
+    most_recent_reported_frequency = frequency;
+    
     if (status == WAITING_FOR_START_FREQUENCY && frequency == GUARD_FREQUENCY_TEXT) {
+        printf("detected start\n");
         status = DETECTED_START_FREQUENCY;
     } else if (status == DETECTED_START_FREQUENCY) {
         status = WAITING_FOR_START_FREQUENCY;
         if (frequency == GUARD_FREQUENCY_TEXT_B) {
+            printf("detected second\n");
             status = RECEIVING_HEADER;
         }
     } else if (status == RECEIVING_HEADER) {
+        printf("detected header nibble\n");
         unsigned char bits = (unsigned char) ((frequency - BASE_FREQ) / LINEAR_INTERVAL);
         header_chunk += bits << (8 - BITS_PER_TONE - header_chunk_count * BITS_PER_TONE);
         header_chunk_count++;
@@ -132,12 +145,12 @@ void process_tone(int frequency) {
             status = RECEIVING_BODY;
         }
     } else if (status == RECEIVING_BODY) {
-
-        printf("%i\n", frequency);
-
+        
+        printf("body: %i\n", frequency);
+        
+        
         append_bits((unsigned char) ((frequency - BASE_FREQ) / LINEAR_INTERVAL));
     }
-
 }
 
 void append_bits(unsigned char bits) {
