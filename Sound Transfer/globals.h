@@ -16,4 +16,6 @@ extern const double GUARD_FREQUENCY_TEXT_B;
 extern const double GUARD_FREQUENCY_IMG;
 extern const double GUARD_FREQUENCY_IMG_B;
 
+extern const double REPEAT_SEPARATOR_FREQUENCY;
+
 #endif

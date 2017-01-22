@@ -13,3 +13,5 @@ const double GUARD_FREQUENCY_TEXT_B = 900;
 
 const double GUARD_FREQUENCY_IMG = 800;
 const double GUARD_FREQUENCY_IMG_B = 900;
+
+const double REPEAT_SEPARATOR_FREQUENCY = 850;

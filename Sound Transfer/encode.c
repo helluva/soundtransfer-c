@@ -86,3 +86,44 @@ int* freqs_from_input(const char* data, int num_of_bytes) {
     output[3] = y;
     return output;
 }
+
+int* separate_repeating_freqs(int* freqs, int num_of_freqs) {
+    
+    //determine extra space needed for new malloc
+    int numberOfSeparatorsNeeded = 0;
+    int previousFrequency= -1;
+    
+    for (int i = 0; i < num_of_freqs; i++) {
+        int freq = freqs[i];
+        if (freq == previousFrequency) {
+            numberOfSeparatorsNeeded += 1;
+        }
+        previousFrequency = freq;
+    }
+    
+    //malloc new space
+    int newCount = num_of_freqs + numberOfSeparatorsNeeded;
+    int* newFreqs = malloc(sizeof(int) * (newCount));
+    
+    printf("old: %i   new: %i\n", num_of_freqs, newCount);
+    
+    //add all freqs to the new array with separators
+    int numberOfSeparatorsUsedSoFar = 0;
+    previousFrequency = -1;
+    
+    for (int i = 0; i < newCount; i++) {
+        int freq = freqs[i - numberOfSeparatorsUsedSoFar];
+        
+        if (freq == previousFrequency) {
+            numberOfSeparatorsUsedSoFar += 1;
+            newFreqs[i] = REPEAT_SEPARATOR_FREQUENCY;
+            previousFrequency = -1;
+        } else {
+            newFreqs[i] = freq;
+            previousFrequency = freq;
+        }
+    }
+    
+    return newFreqs;
+    
+}
