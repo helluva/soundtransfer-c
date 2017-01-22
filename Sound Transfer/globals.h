@@ -10,8 +10,10 @@ extern const int SAMPLES_PER_CHUNK;
 
 extern const double MATCH_THRESHOLD;
 
-extern const double GUARD_FREQUENCY;
-extern const double GUARD_FREQUENCY_B;
+extern const double GUARD_FREQUENCY_TEXT;
+extern const double GUARD_FREQUENCY_TEXT_B;
 
+extern const double GUARD_FREQUENCY_IMG;
+extern const double GUARD_FREQUENCY_IMG_B;
 
 #endif
