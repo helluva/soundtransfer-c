@@ -21,10 +21,19 @@ static int* num_of_tones_for_data;
 static unsigned char** decoded_bytes_p;
 
 
-static double* chunk;
 static int received_freq_index = 0;
 
 static int appended_bits_count = 0;
+
+
+
+static int det_counter = 0;
+
+
+static int moving_avg_index = 0;
+static double moving_avg[9]; //SAMPLES_PER_CHUNK
+
+
 
 
 void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes) {
@@ -35,9 +44,14 @@ void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes) {
     header_chunk_count = 0;
     header_chunk = 0;
 
-    appended_bits_count = 0;
+    det_counter = SAMPLES_PER_CHUNK;
 
-    chunk = malloc(sizeof(double) * SAMPLES_PER_CHUNK);
+    moving_avg_index = 0;
+    for (int i = 0; i < SAMPLES_PER_CHUNK; ++i) {
+        moving_avg[i] = 0;
+    }
+
+    appended_bits_count = 0;
 
     status = WAITING_FOR_START_FREQUENCY;
 }
@@ -48,78 +62,33 @@ int receive_frame(double frequency) {
         return status;
     }
     
-    //printf("%i\n", (int)frequency);
+    det_counter++;
+    
+    moving_avg[moving_avg_index % SAMPLES_PER_CHUNK] = frequency;
+    moving_avg_index = (moving_avg_index + 1) % SAMPLES_PER_CHUNK;
+    
+    double avg = find_avg(moving_avg);
+    int det = close_frequency(avg);
 
-    chunk[received_freq_index++] = frequency;
-    if (received_freq_index == SAMPLES_PER_CHUNK) {
-        process_chunk(chunk);
-        received_freq_index = 0;
+    //printf("freq: %i     avg: %i      det: %i\n", (int)frequency, (int)avg, (int)det);
+    
+    if (det && det_counter >= SAMPLES_PER_CHUNK / 2) {
+        det_counter = 0;
+        process(det);
     }
 
     return status;
 }
 
-void process_chunk(double* chunk) {
+void process(int frequency) {
 
-    //printf("-200\n");
+    printf("processing %i\n", frequency);
     
-    int num_of_frequencies = (0x1 << BITS_PER_TONE);
-    int num_of_buckets = num_of_frequencies + 2;
-    int GUARD_FREQUENCY_TEXT_bucket = num_of_frequencies;
-    int GUARD_FREQUENCY_TEXT_B_bucket = num_of_frequencies + 1;
-
-    int matches_per_frequency[num_of_buckets];
-    for (int i = 0; i < num_of_buckets; i++) {
-        matches_per_frequency[i] = 0;
-    }
-
-
-    for (int i = 0; i < SAMPLES_PER_CHUNK; ++i) {
-
-        if (compare_freq(chunk[i], GUARD_FREQUENCY_TEXT)) {
-            matches_per_frequency[GUARD_FREQUENCY_TEXT_bucket]++;
-        } else if (compare_freq(chunk[i], GUARD_FREQUENCY_TEXT_B)) {
-            matches_per_frequency[GUARD_FREQUENCY_TEXT_B_bucket]++;
-        } else {
-            for (int f = 0; f < num_of_frequencies; ++f) {
-                if (compare_freq(chunk[i], BASE_FREQ + LINEAR_INTERVAL * f)) {
-                    matches_per_frequency[f]++;
-                }
-            }
-        }
-
-    }
-
-    int max_count = 0;
-    int max_count_index = 0;
-    for (int f = 0; f < num_of_buckets; ++f) {
-        if (matches_per_frequency[f] > max_count) {
-            max_count = matches_per_frequency[f];
-            max_count_index = f;
-        }
-    }
-
-    if (max_count > 3) {
-        if (max_count_index == GUARD_FREQUENCY_TEXT_bucket) {
-            process_tone(GUARD_FREQUENCY_TEXT);
-        } else if (max_count_index == GUARD_FREQUENCY_TEXT_B_bucket) {
-            process_tone(GUARD_FREQUENCY_TEXT_B);
-        }  else {
-            process_tone(BASE_FREQ + LINEAR_INTERVAL * max_count_index);
-        }
-    }
-
-}
-
-void process_tone(int frequency) {
-
-    //printf("received %i\n", frequency);
-
-    if (status == WAITING_FOR_START_FREQUENCY && frequency == GUARD_FREQUENCY_TEXT) {
+    if (status == WAITING_FOR_START_FREQUENCY && frequency == GUARD_FREQUENCY) {
         status = DETECTED_START_FREQUENCY;
     } else if (status == DETECTED_START_FREQUENCY) {
         status = WAITING_FOR_START_FREQUENCY;
-        if (frequency == GUARD_FREQUENCY_TEXT_B) {
+        if (frequency == GUARD_FREQUENCY_B) {
             status = RECEIVING_HEADER;
         }
     } else if (status == RECEIVING_HEADER) {
@@ -132,9 +101,6 @@ void process_tone(int frequency) {
             status = RECEIVING_BODY;
         }
     } else if (status == RECEIVING_BODY) {
-        
-        printf("%i\n", frequency);
-        
         append_bits((unsigned char) ((frequency - BASE_FREQ) / LINEAR_INTERVAL));
     }
 
@@ -160,4 +126,30 @@ void append_bits(unsigned char bits) {
 int compare_freq(double frequency, double target_frequency) {
     double difference = fabs(frequency - target_frequency);
     return difference < MATCH_THRESHOLD;
+}
+
+
+
+int cmpfunc (const void * a, const void * b) {
+    return ( *(int*)a - *(int*)b );
+}
+
+double find_avg(double* freqs) {
+    int temp[9];
+    for (int i = 0; i < 9; ++i) {
+        temp[i] = (int) freqs[i];
+    }
+    qsort(temp, 9, sizeof(int), cmpfunc);
+    return temp[4];
+}
+
+int close_frequency(double freq) {
+    for (int i = 0; i < (0x1 << BITS_PER_TONE); ++i) {
+        if (compare_freq(freq, BASE_FREQ + i * LINEAR_INTERVAL)) {
+            return BASE_FREQ + i * LINEAR_INTERVAL;
+        }
+    }
+    if (compare_freq(freq, GUARD_FREQUENCY)) return GUARD_FREQUENCY;
+    if (compare_freq(freq, GUARD_FREQUENCY_B)) return GUARD_FREQUENCY_B;
+    return 0;
 }
