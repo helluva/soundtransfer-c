@@ -23,3 +23,7 @@ int* freqs_from_input(const char* data, int num_of_bytes) {
     output[2] = numbytes & 0xFF;
     return output;
 }
+
+int main() {
+    return 0;
+}

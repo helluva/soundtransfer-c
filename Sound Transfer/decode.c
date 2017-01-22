@@ -158,6 +158,6 @@ void append_bits(unsigned char bits) {
 
 
 int compare_freq(double frequency, double target_frequency) {
-    double difference = abs(frequency - target_frequency);
+    double difference = fabs(frequency - target_frequency);
     return difference < MATCH_THRESHOLD;
 }
