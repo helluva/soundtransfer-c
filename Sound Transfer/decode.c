@@ -42,7 +42,7 @@ void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes) {
     chunk = malloc(sizeof(double) * SAMPLES_PER_CHUNK);
 
     status = WAITING_FOR_START_FREQUENCY;
-    
+
     most_recent_reported_frequency = -1;
 }
 
@@ -116,15 +116,14 @@ void process_chunk(double* chunk) {
 }
 
 void process_tone(int frequency) {
-
     printf("received %i\n", frequency);
-    
+
     if (most_recent_reported_frequency == frequency) {
         return;
     }
-    
+
     most_recent_reported_frequency = frequency;
-    
+
     if (status == WAITING_FOR_START_FREQUENCY && frequency == GUARD_FREQUENCY_TEXT) {
         printf("detected start\n");
         status = DETECTED_START_FREQUENCY;
@@ -145,10 +144,10 @@ void process_tone(int frequency) {
             status = RECEIVING_BODY;
         }
     } else if (status == RECEIVING_BODY) {
-        
+
         printf("body: %i\n", frequency);
-        
-        
+
+
         append_bits((unsigned char) ((frequency - BASE_FREQ) / LINEAR_INTERVAL));
     }
 }
@@ -158,7 +157,6 @@ void append_bits(unsigned char bits) {
     unsigned char* cur_byte = &((*decoded_bytes_p)[appended_bits_count / 8]);
 
     *cur_byte += bits << (8 - appended_bits_count % 8 - BITS_PER_TONE);
-
     appended_bits_count += BITS_PER_TONE;
 
     if (appended_bits_count / 8 >= *num_of_tones_for_data) {
