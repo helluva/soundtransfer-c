@@ -11,5 +11,5 @@ const double MATCH_THRESHOLD = 25.0;
 const double GUARD_FREQUENCY_TEXT = 800;
 const double GUARD_FREQUENCY_TEXT_B = 900;
 
-const double GUARD_FREQUENCY_IMG = 750;
-const double GUARD_FREQUENCY_IMG_B = 850;
+const double GUARD_FREQUENCY_IMG = 800;
+const double GUARD_FREQUENCY_IMG_B = 900;

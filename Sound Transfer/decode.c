@@ -47,7 +47,7 @@ int receive_frame(double frequency) {
     if (status == UNINITIALIZED || status == TRANSFER_COMPLETE) {
         return status;
     }
-    
+
     //printf("%i\n", (int)frequency);
 
     chunk[received_freq_index++] = frequency;
@@ -62,7 +62,7 @@ int receive_frame(double frequency) {
 void process_chunk(double* chunk) {
 
     //printf("-200\n");
-    
+
     int num_of_frequencies = (0x1 << BITS_PER_TONE);
     int num_of_buckets = num_of_frequencies + 2;
     int GUARD_FREQUENCY_TEXT_bucket = num_of_frequencies;
@@ -132,9 +132,9 @@ void process_tone(int frequency) {
             status = RECEIVING_BODY;
         }
     } else if (status == RECEIVING_BODY) {
-        
+
         printf("%i\n", frequency);
-        
+
         append_bits((unsigned char) ((frequency - BASE_FREQ) / LINEAR_INTERVAL));
     }
 
@@ -154,7 +154,13 @@ void append_bits(unsigned char bits) {
 
 }
 
-
+int* process_colors(unsigned char bits) {
+    static int a[4];
+    for (int i = 0; i < 4; ++i) {
+        a[i] = (bits >> (2 * (3 - i))) & 0x3;
+    }
+    return a;
+}
 
 
 int compare_freq(double frequency, double target_frequency) {
