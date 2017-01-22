@@ -47,8 +47,6 @@ void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes) {
 
 
 int receive_frame(double frequency) {
-
-    printf("%i\n", (int)frequency);
     
     if (status == UNINITIALIZED || status == TRANSFER_COMPLETE) {
         return status;
@@ -108,9 +106,6 @@ void process(int frequency) {
 }
 
 void append_bits(unsigned char bits) {
-
-    printf("%i\n", -200);
-    
     
     unsigned char* cur_byte = &((*decoded_bytes_p)[appended_bits_count / 8]);
 
@@ -120,6 +115,8 @@ void append_bits(unsigned char bits) {
 
     if (appended_bits_count / 8 >= *num_of_tones_for_data) {
         status = TRANSFER_COMPLETE;
+        free(*decoded_bytes_p);
+        *decoded_bytes_p = 0;
     }
 
 }

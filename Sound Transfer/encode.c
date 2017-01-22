@@ -13,12 +13,12 @@ int* freqs_from_color(const char* data, int num_colors) {
         mid[i / 4] = (data[i] << 6) | (data[i + 1] << 4) | (data[i + 2] << 2) | data[i + 3];
     }
     
-    return freqs_from_input(mid, num_colors / 4);
+    printf("num_colors: %i   num_freqs: %i\n", num_colors, num_colors / 2);
+    
+    return freqs_from_input(mid, (num_colors / 2) + 5);
 }
 
 int* freqs_from_input(const char* data, int num_of_bytes) {
-    
-    printf("num: %i\n", num_of_bytes);
     
     int mallocSize = (5 + num_of_bytes * 8 / BITS_PER_TONE);
     int* output = malloc(sizeof(int) * mallocSize);
@@ -49,13 +49,13 @@ int* freqs_from_input(const char* data, int num_of_bytes) {
             (((unsigned char) (num_of_bytes)) >> (8 - BITS_PER_TONE - (1 * BITS_PER_TONE))) & (((unsigned char) (0x1 << BITS_PER_TONE)) - 1)
 
         )) * LINEAR_INTERVAL;
-
+    
     output[0] = GUARD_FREQUENCY_TEXT;
     output[1] = GUARD_FREQUENCY_TEXT_B;
     output[2] = x;
     output[3] = y;
     output[mallocSize - 1] = GUARD_FREQUENCY_TEXT;
-    return output;
+    return separate_repeating_freqs(output, mallocSize);
 }
 
 int* separate_repeating_freqs(int* freqs, int num_of_freqs) {
@@ -66,6 +66,7 @@ int* separate_repeating_freqs(int* freqs, int num_of_freqs) {
     
     for (int i = 0; i < num_of_freqs; i++) {
         int freq = freqs[i];
+        printf("%i\n", freq);
         if (freq == previousFrequency) {
             numberOfSeparatorsNeeded += 1;
         }
@@ -75,8 +76,6 @@ int* separate_repeating_freqs(int* freqs, int num_of_freqs) {
     //malloc new space
     int newCount = num_of_freqs + numberOfSeparatorsNeeded;
     int* newFreqs = malloc(sizeof(int) * (newCount));
-    
-    printf("old: %i   new: %i\n", num_of_freqs, newCount);
     
     //add all freqs to the new array with separators
     int numberOfSeparatorsUsedSoFar = 0;
