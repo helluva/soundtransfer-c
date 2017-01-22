@@ -37,13 +37,6 @@ void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes) {
 
     appended_bits_count = 0;
 
-
-    // THIS IS TEMPORARY FOR TESTING!
-    *num_of_tones_for_data = 54;
-    *decoded_bytes_p = malloc(sizeof(char) * 27); // 4 bytes
-    // THIS IS TEMPORARY!
-
-
     chunk = malloc(sizeof(double) * SAMPLES_PER_CHUNK);
 
     status = WAITING_FOR_START_FREQUENCY;
