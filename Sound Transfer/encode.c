@@ -7,15 +7,13 @@
 
 int* freqs_from_color(const char* data, int num_colors) {
     
-    char* mid = malloc(num_colors / 2);
+    char* mid = malloc(num_colors / 4);
     
     for (int i = 0; i < num_colors; i += 4) {
         mid[i / 4] = (data[i] << 6) | (data[i + 1] << 4) | (data[i + 2] << 2) | data[i + 3];
     }
     
-    printf("num_colors: %i   num_freqs: %i\n", num_colors, num_colors / 2);
-    
-    return freqs_from_input(mid, (num_colors / 2) + 5);
+    return freqs_from_input(mid, (num_colors / 4));
 }
 
 int* freqs_from_input(const char* data, int num_of_bytes) {
@@ -66,7 +64,6 @@ int* separate_repeating_freqs(int* freqs, int num_of_freqs) {
     
     for (int i = 0; i < num_of_freqs; i++) {
         int freq = freqs[i];
-        printf("%i\n", freq);
         if (freq == previousFrequency) {
             numberOfSeparatorsNeeded += 1;
         }

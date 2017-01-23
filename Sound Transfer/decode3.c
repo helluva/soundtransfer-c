@@ -43,10 +43,16 @@ void initialize_decoder(int* num_of_tones, unsigned char** decoded_bytes) {
     candidate_freq = 0;
 
     status = WAITING_FOR_START_FREQUENCY;
+    *num_of_tones_for_data = -1;
 }
 
 
 int receive_frame(double frequency) {
+    
+    if (*num_of_tones_for_data == -1) {
+        *num_of_tones_for_data = 0;
+        status = WAITING_FOR_START_FREQUENCY;
+    }
     
     if (status == UNINITIALIZED || status == TRANSFER_COMPLETE) {
         return status;
@@ -64,20 +70,15 @@ int receive_frame(double frequency) {
 
 void process(int frequency) {
 
-    //printf("processing %i\n", frequency);
-
     if (status == WAITING_FOR_START_FREQUENCY && frequency == GUARD_FREQUENCY_TEXT) {
         status = DETECTED_START_FREQUENCY;
-        //printf("status = detected start freq\n");
     } else if (status == DETECTED_START_FREQUENCY) {
         status = WAITING_FOR_START_FREQUENCY;
         if (frequency == GUARD_FREQUENCY_TEXT) {
             status = DETECTED_START_FREQUENCY;
         }
-        //printf("status = waiting for start\n");
         if (frequency == GUARD_FREQUENCY_TEXT_B) {
             status = RECEIVING_HEADER;
-            //printf("status = receiving header\n");
         }
     } else {
 
@@ -90,8 +91,6 @@ void process(int frequency) {
             header_chunk += bits << (8 - BITS_PER_TONE - header_chunk_count * BITS_PER_TONE);
             header_chunk_count++;
 
-            //printf("header chunk: %i     count: %i\n", (int)header_chunk, header_chunk_count);
-
             if (header_chunk_count >= 8 / BITS_PER_TONE) {
                 *num_of_tones_for_data = header_chunk * (8 / BITS_PER_TONE);
 
@@ -100,6 +99,11 @@ void process(int frequency) {
                 status = RECEIVING_BODY;
             }
         } else if (status == RECEIVING_BODY) {
+            
+            if (frequency == GUARD_FREQUENCY_TEXT) {
+                status = TRANSFER_COMPLETE;
+            }
+            
             append_bits((unsigned char) ((frequency - BASE_FREQ) / LINEAR_INTERVAL));
         }
     }
@@ -121,7 +125,7 @@ void append_bits(unsigned char bits) {
 
 }
 
-char* process_colors(char byte) {
+char* process_colors(unsigned char byte) {
     static char a[4];
     for (int i = 0; i < 4; ++i)
     {
